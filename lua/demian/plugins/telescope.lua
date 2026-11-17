@@ -2,7 +2,7 @@
 -- finding definitions, symbols, etc. 
 return {
   "nvim-telescope/telescope.nvim",
-  branch = "0.1.x",
+  branch = "master", -- 0.1.x is incompatible with nvim-treesitter's `main` branch
   dependencies = {
     "nvim-lua/plenary.nvim",
     { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },

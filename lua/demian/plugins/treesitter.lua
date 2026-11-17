@@ -1,59 +1,57 @@
 -- Formatting and higlight code according to programming language
+-- NOTE: Uses the nvim-treesitter `main` branch (rewrite). It no longer has
+-- `nvim-treesitter.configs`; highlighting/indent are enabled per FileType below.
+-- Requires the `tree-sitter` CLI (>= 0.26.1) and a C compiler to install parsers.
 return {
   "nvim-treesitter/nvim-treesitter",
-  event = { "BufReadPre", "BufNewFile" },
+  branch = "main",
+  lazy = false, -- the main branch does not support lazy-loading
   build = ":TSUpdate",
   dependencies = {
-    "windwp/nvim-ts-autotag",
+    -- auto close/rename html tags (configured on its own now)
+    { "windwp/nvim-ts-autotag", opts = {} },
   },
   config = function()
-    -- import nvim-treesitter plugin
-    local treesitter = require("nvim-treesitter.configs")
+    local ts = require("nvim-treesitter")
 
-    -- configure treesitter
-    treesitter.setup({ -- enable syntax highlighting
-      highlight = {
-        enable = true,
-      },
-      -- enable indentation
-      indent = { enable = true },
-      -- enable autotagging (w/ nvim-ts-autotag plugin)
-      autotag = {
-        enable = true,
-      },
-      -- ensure these language parsers are installed
-      ensure_installed = {
-        "json",
-          "javascript",
-          "typescript",
-        "tsx",
-        "yaml",
-        "html",
-        "css",
-        "prisma",
-        "markdown",
-        "markdown_inline",
-        "svelte",
-        "graphql",
-        "bash",
-        "lua",
-        "vim",
-        "dockerfile",
-        "gitignore",
-        "query",
-        "vimdoc",
-        "c",
-        "python",
-      },
-      incremental_selection = {
-        enable = true,
-        keymaps = {
-          init_selection = "<C-space>",
-          node_incremental = "<C-space>",
-          scope_incremental = false,
-          node_decremental = "<bs>",
-        },
-      },
+    -- ensure these language parsers are installed (no-op if already installed)
+    ts.install({
+      "json",
+      "javascript",
+      "typescript",
+      "tsx",
+      "yaml",
+      "html",
+      "css",
+      "prisma",
+      "markdown",
+      "markdown_inline",
+      "svelte",
+      "graphql",
+      "bash",
+      "lua",
+      "vim",
+      "dockerfile",
+      "gitignore",
+      "query",
+      "vimdoc",
+      "c",
+      "python",
     })
+
+    -- enable syntax highlighting and indentation for any buffer with a parser
+    vim.api.nvim_create_autocmd("FileType", {
+      group = vim.api.nvim_create_augroup("demian_treesitter", { clear = true }),
+      callback = function(args)
+        if pcall(vim.treesitter.start, args.buf) then
+          vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
+      end,
+    })
+
+    -- incremental selection (built into Neovim 0.12 as `an` / `in` in visual mode)
+    vim.keymap.set("n", "<C-space>", "van", { remap = true, desc = "Start treesitter selection" })
+    vim.keymap.set("x", "<C-space>", "an", { remap = true, desc = "Expand treesitter selection" })
+    vim.keymap.set("x", "<bs>", "in", { remap = true, desc = "Shrink treesitter selection" })
   end,
 }
