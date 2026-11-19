@@ -1,3 +1,6 @@
+-- Python provider: use the venv that has the neovim module installed
+vim.g.python3_host_prog = vim.fn.expand("~/.local/share/nvim-venv/bin/python")
+
 vim.cmd("let g:netrw_liststyle = 3")
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
@@ -33,6 +36,20 @@ opt.backspace = "indent,eol,start" -- allow backspace on indent, end of line or 
 
 -- clipboard
 opt.clipboard:append("unnamedplus") -- use system clipboard as default register
+
+-- no X/Wayland clipboard on the server: copy via OSC 52 (works through the SSH terminal)
+local osc52 = require("vim.ui.clipboard.osc52")
+vim.g.clipboard = {
+  name = "OSC 52",
+  copy = {
+    ["+"] = osc52.copy("+"),
+    ["*"] = osc52.copy("*"),
+  },
+  paste = {
+    ["+"] = osc52.paste("+"),
+    ["*"] = osc52.paste("*"),
+  },
+}
 
 -- split windows
 opt.splitright = true -- split vertical window to the right

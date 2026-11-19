@@ -9,9 +9,6 @@ return {
     { "folke/neodev.nvim", opts = {} },
   },
   config = function()
-    -- import lspconfig plugin
-    local lspconfig = require("lspconfig")
-
     -- import mason_lspconfig plugin
     local mason_lspconfig = require("mason-lspconfig")
 
@@ -136,7 +133,8 @@ return {
     -- })
 
     -- Manual LSP server setup (since mason-lspconfig is commented out)
-    lspconfig.lua_ls.setup({
+    -- Neovim 0.11+ API: vim.lsp.config sets options, vim.lsp.enable starts the server
+    vim.lsp.config("lua_ls", {
       capabilities = capabilities,
       settings = {
         Lua = {
@@ -149,13 +147,16 @@ return {
         },
       },
     })
+    vim.lsp.enable("lua_ls")
 
-    lspconfig.clangd.setup({
+    vim.lsp.config("clangd", {
       capabilities = capabilities,
     })
+    vim.lsp.enable("clangd")
 
-    lspconfig.html.setup({
+    vim.lsp.config("html", {
       capabilities = capabilities,
     })
+    vim.lsp.enable("html")
   end,
 }
